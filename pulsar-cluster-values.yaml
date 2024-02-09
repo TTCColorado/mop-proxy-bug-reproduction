@@ -1,0 +1,79 @@
+volumes:
+  persistence: false
+tls:
+  enabled: true
+  proxy:
+    enabled: true
+  broker:
+    enabled: true
+  zookeeper:
+    enabled: true
+# issue selfsigning certs
+certs:
+  internal_issuer:
+    enabled: true
+    type: selfsigning
+autorecovery:
+  podMonitor:
+    enabled: false
+bookkeeper:
+  replicaCount: 1
+  podMonitor:
+    enabled: false
+broker:
+  # They spell this wrong in the chart, so don't blame me
+  # NOTE: I believe this needs to be on the statefulset definition because it referense pod metadata,
+  # rather than part of the configData.
+  replicaCount: 2
+  extreEnvs:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          # this will be the metadata.name of the pod not the statefulset
+          fieldPath: metadata.name
+    - name: PULSAR_PREFIX_mqttListeners
+      # this is the FQDN to lookup this current pod, I have verfied this through `dig` that this resolves
+      # correctly to the pod's assigned IP address.
+      value: mqtt://$(POD_NAME).pulsar-broker.default.svc.cluster.local:1883
+    - name: PULSAR_PREFIX_advertisedAddress
+      value: $(POD_NAME).pulsar-broker.default.svc.cluster.local
+  configData:
+    PULSAR_PREFIX_messagingProtocols: mqtt
+    PULSAR_PREFIX_mqttMessageMaxLength: "268435455"
+    PULSAR_PREFIX_mqttProxyEnabled: "true"
+    PULSAR_PREFIX_protocolHandlerDirectory: /pulsar/protocols
+  podMonitor:
+    enabled: false
+defaultPulsarImageTag: "3.1.1"
+functions:
+  podMonitor:
+    enabled": false
+images:
+  broker:
+    repository: "streamnative/sn-pulsar"
+    tag: "3.1.2.1"
+kube-prometheus-stack:
+  alertmanager:
+    enabled: false
+  enabled: false
+  grafana:
+    enabled: false
+  prometheus:
+    enabled: false
+  prometheusOperator:
+    enabled: false
+namespace: default
+proxy:
+  replicaCount: 1
+  podMonitor:
+    enabled: false
+pulsar_manager:
+  podMonitor:
+    enabled: false
+toolset:
+  podMonitor:
+    enabled: false
+zookeeper:
+  replicaCount: 1
+  podMonitor:
+    enabled: false
