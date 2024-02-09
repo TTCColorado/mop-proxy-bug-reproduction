@@ -28,7 +28,7 @@ Update helm repos: `helm repo update`
    which is the minimal amount of brokers to reproduce the connection failure.
 2. Wait for the cluster to become available.
 3. Forward the MoP proxy port to localhost: `kubectl port-forward pod/pulsar-broker-1 1883:5682`
-4. Run the provided Java example `./test-client`, observe the client fail after a few seconds.
+4. Run the provided Java example `./test-client`, observe the client connection fail after a few seconds.
 
 ## Things to try
 
